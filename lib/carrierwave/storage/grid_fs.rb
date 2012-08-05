@@ -26,38 +26,35 @@ module CarrierWave
     #
     #      http://your-app.com/images/:document-identifier-here
     #
-    # When you already have a Mongo connection object (for example through Mongoid)
+    # When you already have a Mongo connection object (for example through MongoMapper)
     # you can also reuse this connection:
     #
     #     CarrierWave.configure do |config|
     #       config.storage = :grid_fs
-    #       config.grid_fs_connection = Mongoid.database
+    #       config.grid_fs_connection = MongoMapper.database
     #       config.grid_fs_access_url = "/images"
     #     end
     #
     class GridFS < Abstract
 
       class File
+        attr_reader :path
 
         def initialize(uploader, path)
           @path = path
           @uploader = uploader
         end
 
-        def path
-          @path
-        end
-
         def url
           unless @uploader.grid_fs_access_url
             nil
           else
-            [@uploader.grid_fs_access_url, @path].join("/").squeeze("/")
+            ::File.join(@uploader.grid_fs_access_url, path)
           end
         end
 
         def read
-          grid.open(@path, 'r').data
+          grid.open(path, 'r').data
         end
 
         def write(file)
@@ -67,15 +64,15 @@ module CarrierWave
         end
 
         def delete
-          grid.delete(@path)
+          grid.delete(path)
         end
 
         def content_type
-          grid.open(@path, 'r').content_type
+          grid.open(path, 'r').content_type
         end
 
         def file_length
-          grid.open(@path, 'r').file_length
+          grid.open(path, 'r').file_length
         end
         alias :size :file_length
 
