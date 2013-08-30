@@ -6,7 +6,7 @@ require 'mongo'
 shared_examples_for "a GridFS connection" do
   describe '#store!' do
     before do
-      @uploader.stub!(:store_path).and_return('uploads/bar.txt')
+      @uploader.stub(:store_path).and_return('uploads/bar.txt')
       @grid_fs_file = @storage.store!(@file)
     end
 
@@ -28,7 +28,7 @@ shared_examples_for "a GridFS connection" do
 
     it "should be deletable" do
       @grid_fs_file.delete
-      lambda {@grid.open('uploads/bar.txt', 'r')}.should raise_error(Mongo::GridFileNotFound)
+      lambda { @grid.open('uploads/bar.txt', 'r') }.should raise_error(Mongo::GridFileNotFound)
     end
 
     it "should store the content type on GridFS" do
@@ -43,7 +43,7 @@ shared_examples_for "a GridFS connection" do
   describe '#retrieve!' do
     before do
       @grid.open('uploads/bar.txt', 'w') { |f| f.write "A test, 1234" }
-      @uploader.stub!(:store_path).with('bar.txt').and_return('uploads/bar.txt')
+      @uploader.stub(:store_path).with('bar.txt').and_return('uploads/bar.txt')
       @grid_fs_file = @storage.retrieve!('bar.txt')
     end
 
@@ -60,35 +60,35 @@ shared_examples_for "a GridFS connection" do
     end
 
     it "should return a relative URL path if access_url is set to the root path" do
-      @uploader.stub!(:grid_fs_access_url).and_return("/")
+      @uploader.stub(:grid_fs_access_url).and_return("/")
       @grid_fs_file.url.should == "/uploads/bar.txt"
     end
 
     it "should return a URL path if access_url is set to a file path" do
-      @uploader.stub!(:grid_fs_access_url).and_return("/image/show")
+      @uploader.stub(:grid_fs_access_url).and_return("/image/show")
       @grid_fs_file.url.should == "/image/show/uploads/bar.txt"
     end
 
     it "should return an absolute URL if access_url is set to an absolute URL" do
-      @uploader.stub!(:grid_fs_access_url).and_return("http://example.com/images/")
+      @uploader.stub(:grid_fs_access_url).and_return("http://example.com/images/")
       @grid_fs_file.url.should == "http://example.com/images/uploads/bar.txt"
     end
 
     it "should be deletable" do
       @grid_fs_file.delete
-      lambda {@grid.open('uploads/bar.txt', 'r')}.should raise_error(Mongo::GridFileNotFound)
+      lambda { @grid.open('uploads/bar.txt', 'r') }.should raise_error(Mongo::GridFileNotFound)
 
     end
   end
 
   describe '#retrieve! on a store_dir with leading slash' do
     before do
-      @uploader.stub!(:store_path).with('bar.txt').and_return('/uploads/bar.txt')
+      @uploader.stub(:store_path).with('bar.txt').and_return('/uploads/bar.txt')
       @grid_fs_file = @storage.retrieve!('bar.txt')
     end
 
     it "should return a relative URL path if access_url is set to the root path" do
-      @uploader.stub!(:grid_fs_access_url).and_return("/")
+      @uploader.stub(:grid_fs_access_url).and_return("/")
       @grid_fs_file.url.should == "/uploads/bar.txt"
     end
   end
@@ -100,18 +100,18 @@ describe CarrierWave::Storage::GridFS do
   before do
     @database = Mongo::Connection.new('localhost', 27017).db('carrierwave_test')
 
-    @uploader = mock('an uploader')
-    @uploader.stub!(:grid_fs_access_url).and_return(nil)
+    @uploader = double(:uploader)
+    @uploader.stub(:grid_fs_access_url).and_return(nil)
   end
 
   context "when reusing an existing connection manually" do
     before do
-      @uploader.stub!(:grid_fs_connection).and_return(@database)
+      @uploader.stub(:grid_fs_connection).and_return(@database)
 
       @grid = Mongo::GridFileSystem.new(@database)
 
       @storage = CarrierWave::Storage::GridFS.new(@uploader)
-      @file = stub_tempfile('test.jpg', 'application/xml')
+      @file    = stub_tempfile('test.jpg', 'application/xml')
     end
 
     it_should_behave_like "a GridFS connection"
@@ -122,7 +122,7 @@ describe CarrierWave::Storage::GridFS do
     describe "#recreate_versions!" do
       before do
         @uploader_class = Class.new(CarrierWave::Uploader::Base)
-        @uploader_class.class_eval{
+        @uploader_class.class_eval {
           include CarrierWave::MiniMagick
           storage :grid_fs
 
@@ -130,7 +130,7 @@ describe CarrierWave::Storage::GridFS do
         }
 
         @versioned = @uploader_class.new
-        @versioned.stub!(:grid_fs_connection).and_return(@database)
+        @versioned.stub(:grid_fs_connection).and_return(@database)
 
         @versioned.store! File.open(file_path('portrait.jpg'))
       end
@@ -151,13 +151,13 @@ describe CarrierWave::Storage::GridFS do
     describe "resize_to_fill" do
       before do
         @uploader_class = Class.new(CarrierWave::Uploader::Base)
-        @uploader_class.class_eval{
+        @uploader_class.class_eval {
           include CarrierWave::MiniMagick
           storage :grid_fs
         }
 
         @versioned = @uploader_class.new
-        @versioned.stub!(:grid_fs_connection).and_return(@database)
+        @versioned.stub(:grid_fs_connection).and_return(@database)
 
         @versioned.store! File.open(file_path('portrait.jpg'))
       end
@@ -177,17 +177,17 @@ describe CarrierWave::Storage::GridFS do
 
   context "when setting a connection manually" do
     before do
-      @uploader.stub!(:grid_fs_database).and_return("carrierwave_test")
-      @uploader.stub!(:grid_fs_host).and_return("localhost")
-      @uploader.stub!(:grid_fs_port).and_return(27017)
-      @uploader.stub!(:grid_fs_username).and_return(nil)
-      @uploader.stub!(:grid_fs_password).and_return(nil)
-      @uploader.stub!(:grid_fs_connection).and_return(nil)
+      @uploader.stub(:grid_fs_database).and_return("carrierwave_test")
+      @uploader.stub(:grid_fs_host).and_return("localhost")
+      @uploader.stub(:grid_fs_port).and_return(27017)
+      @uploader.stub(:grid_fs_username).and_return(nil)
+      @uploader.stub(:grid_fs_password).and_return(nil)
+      @uploader.stub(:grid_fs_connection).and_return(nil)
 
       @grid = Mongo::GridFileSystem.new(@database)
 
       @storage = CarrierWave::Storage::GridFS.new(@uploader)
-      @file = stub_tempfile('test.jpg', 'application/xml')
+      @file    = stub_tempfile('test.jpg', 'application/xml')
     end
 
     it_should_behave_like "a GridFS connection"

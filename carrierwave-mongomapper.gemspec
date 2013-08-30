@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'carrierwave', ["~> 0.6.1"]
+  s.add_dependency 'carrierwave', ["~> 0.8"]
   s.add_dependency 'mongo_mapper', ["~> 0.9"]
-  s.add_dependency 'rspec' , ["~> 2.8.0"]
+  s.add_dependency 'rspec' , [">= 2.11"]
   s.add_dependency 'bson_ext', ["~> 1.3"]
   s.add_dependency 'mini_magick', ["~> 3.4"]
 end

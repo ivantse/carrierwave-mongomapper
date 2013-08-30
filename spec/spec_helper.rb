@@ -31,9 +31,9 @@ module CarrierWave
         t = Tempfile.new(filename)
         FileUtils.copy_file(file_path(filename), t.path)
 
-        t.stub!(:local_path        => "",
-                :original_filename => filename || fake_name,
-                :content_type      => mime_type)
+        t.stub(:local_path        => "",
+               :original_filename => filename || fake_name,
+               :content_type      => mime_type)
 
         return t
       end
